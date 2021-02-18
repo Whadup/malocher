@@ -1,6 +1,6 @@
 # Malocher
 
-> "*Malocher*" [maˈloːxɐ] is a German colloquialism from the Ruhr-Area for worker, particularly used for miners and steel workers.
+> "*Malocher*" [maˈloːxɐ] is a German colloquialism from the Ruhr-Area for "worker", particularly used for miners and steel workers.
 
 Malocher is a lightweight python library for running jobs on a cluster where nodes are accessed via SSH and share a common network storage like traditional NFS or mountable cloud storage. We
 
