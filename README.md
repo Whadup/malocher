@@ -20,6 +20,16 @@ Simplest way is to use pip
 pip install git+https://github.com/Whadup/malocher
 ```
 
+### Setting up the malocher-workers
+
+This one's easy: 
+
+- Make sure you can access each malocher node from the supervising node using the same SSH key `ssh_private_key`.
+- Make sure each malocher-worker, including the supervisor, has access to a shared directory `malocher_dir`
+- Make sure every malocher-worker, including the supervisor, has the same python environment, e.g. put it into a shared directory.
+
+BTW, we chose the terminology worker/supervisor, because [words matter](https://thenewstack.io/words-matter-finally-tech-looks-at-removing-exclusionary-language/).
+
 ### Sample
 
 ```python
