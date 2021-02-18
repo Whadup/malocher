@@ -1,3 +1,6 @@
+"""
+Run a job passed as first argument
+"""
 import sys
 from .malocher import work
 if __name__ == "__main__":

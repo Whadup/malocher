@@ -1,12 +1,20 @@
+"""
+Malocher is a lightweight python library for running jobs on a cluster where nodes are accessed
+via SSH and share a common network storage like traditional NFS or mountable cloud storage.
+
+Author: Lukas Pfahler
+Repo:   https://github.com/Whadup/malocher
+"""
 import sys
 import os
 import pickle
-import cloudpickle
 from queue import Queue, Empty
 from threading import Thread
-from glob import glob
 from functools import partial
+from glob import glob
+import cloudpickle
 from .ssh import async_ssh
+
 def submit(
     fun,
     *args,
@@ -28,7 +36,7 @@ def submit(
             continue
 
     # Add one to the largest experiment number
-    job = os.path.abspath(os.path.join(malocher_dir, str(max(existing_int_exp+[0,])+1)))
+    job = os.path.abspath(os.path.join(malocher_dir, str(max(existing_int_exp + [0,]) + 1)))
     os.mkdir(job)
     open(os.path.join(job, "globals.bin"), "wb").write(cloudpickle.dumps(globals()))
     open(os.path.join(job, "locals.bin"), "wb").write(cloudpickle.dumps(locals()))
