@@ -7,6 +7,9 @@ import os
 import sys
 import time
 import traceback
+import paramiko
+from paramiko.buffered_pipe import PipeTimeout
+from paramiko.ssh_exception import (SSHException, PasswordRequiredException)
 
 
 logger = logging.getLogger(__name__)
@@ -14,18 +17,13 @@ logger = logging.getLogger(__name__)
 
 
 def async_ssh(cmd_dict):
-    import paramiko
-    from paramiko.buffered_pipe import PipeTimeout
-    from paramiko.ssh_exception import (SSHException, PasswordRequiredException)
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
 
-    retries = 0
-    while True:  # Be robust to transient SSH failures.
+    for retries in range(3):  # Be robust to transient SSH failures.
         try:
             # Set paramiko logging to WARN or higher to squelch INFO messages.
             logging.getLogger('paramiko').setLevel(logging.WARN)
-
             ssh.connect(hostname=cmd_dict['address'],
                         username=cmd_dict['ssh_username'],
                         port=cmd_dict['ssh_port'],
@@ -35,41 +33,18 @@ def async_ssh(cmd_dict):
                         banner_timeout=20)  # Helps prevent timeouts when many concurrent ssh connections are opened.
             # Connection successful, break out of while loop
             break
-
-        except (SSHException,
-                PasswordRequiredException) as e:
-
+        except (SSHException, PasswordRequiredException) as e:
             print(f"SSH connection error when connecting to {cmd_dict['address']}:{cmd_dict['ssh_port']}", file=sys.stderr)
-
             # Print an exception traceback
             traceback.print_exc()
-
-            # Transient SSH errors can occur when many SSH connections are
-            # simultaneously opened to the same server. This makes a few
-            # attempts to retry.
-            retries += 1
-            if retries >= 3:
-                print("SSH connection failed after 3 retries. Exiting.", file=sys.stderr)
-
-                # Connection failed after multiple attempts.  Terminate this thread.
-                os._exit(1)
-
             # Wait a moment before retrying
-            print("Retrying... (attempt {retires}/3)'.format(n=retries, total=3)", file=sys.stderr)
-
+            print("Retrying... (attempt {retries}/3)'.format(n=retries, total=3)", file=sys.stderr)
             time.sleep(1)
+    else:
+        print("SSH connection failed after 3 retries. Exiting.", file=sys.stderr)
+        os._exit(1)
 
-    # Execute the command, and grab file handles for stdout and stderr. Note
-    # that we run the command using the user's default shell, but force it to
-    # run in an interactive login shell, which hopefully ensures that all of the
-    # user's normal environment variables (via the dot files) have been loaded
-    # before the command is run. This should help to ensure that important
-    # aspects of the environment like PATH and PYTHONPATH are configured.
-
-    # print('[ {label} ] : {cmd}'.format(label=cmd_dict['label'],
-    #                                    cmd=cmd_dict['cmd']))
-    # print('$SHELL -i -c \'' + cmd_dict['cmd'] + '\'')
-    stdin, stdout, stderr = ssh.exec_command('$SHELL -i -c \'' + cmd_dict['cmd'] + '\'', get_pty=True)
+    _, stdout, stderr = ssh.exec_command('$SHELL -i -c \'' + cmd_dict['cmd'] + '\'', get_pty=True)
 
     # Set up channel timeout (which we rely on below to make readline() non-blocking)
     channel = stdout.channel
@@ -113,10 +88,6 @@ def async_ssh(cmd_dict):
         # terminate.
         if channel.exit_status_ready():
             exit_status = channel.recv_exit_status()
-            # cmd_dict['output_queue'].put('[ {label} ] : '.format(label=cmd_dict['label']) +
-            #                              bcolors.FAIL +
-            #                              "remote process exited with exit status " +
-            #                              str(exit_status) + bcolors.ENDC)
             return True
         return False
 
