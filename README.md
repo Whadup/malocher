@@ -20,7 +20,7 @@ Simplest way is to use pip
 pip install git+https://github.com/Whadup/malocher
 ```
 
-###Sample
+### Sample
 
 ```python
 import os
