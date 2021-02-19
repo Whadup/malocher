@@ -55,7 +55,7 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
     ----------
     malocher_dir : list of str
         The shared folder used for storing jobs and results
-    ssh_machines : list of str 
+    ssh_machines : list of str
         List of Hostnames to run the jobs on. Can be either hostnames or IP-addresses. Must accept ssh connections with private key authorization.
     ssh_username : str or list of str
         The username for logging onto the `ssh_machines`. If a single user is provided as `str`, this user is used for all `ssh_machines`. Alternatively you can provide a list of str of the same length as `ssh_machines`.
@@ -89,11 +89,15 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
 
     def _ssh_call(args, machine=None, job=None):
         #put back machine after the ssh call and recover results
-        async_ssh(args)
+        result = async_ssh(args)
         available_machines.put(machine)
-        with open(os.path.join(job, "return.bin"), "rb") as f:
-            result = pickle.load(f)
-            results.put((job, result))
+        if result == 0:
+            with open(os.path.join(job, "return.bin"), "rb") as f:
+                result = pickle.load(f)
+                results.put((job, result))
+        else:
+            with open(os.path.join(job, "DONE"), "w") as f:
+                f.write("ERROR")
 
     for m in zip(ssh_machines, ssh_username, ssh_port, ssh_private_key):
         available_machines.put(m)

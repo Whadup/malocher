@@ -44,7 +44,8 @@ def async_ssh(cmd_dict):
         print("SSH connection failed after 3 retries. Exiting.", file=sys.stderr)
         os._exit(1)
 
-    _, stdout, stderr = ssh.exec_command('$SHELL -i -c \'' + cmd_dict['cmd'] + '\'', get_pty=True)
+    # _, stdout, stderr = ssh.exec_command('$SHELL -i -c \'' + cmd_dict['cmd'] + '\'', get_pty=True)
+    _, stdout, stderr = ssh.exec_command(cmd_dict['cmd'], get_pty=True)
 
     # Set up channel timeout (which we rely on below to make readline() non-blocking)
     channel = stdout.channel
@@ -83,20 +84,23 @@ def async_ssh(cmd_dict):
         """
         read_from_stdout()
         read_from_stderr()
-
         # Check to see if the process has exited. If it has, we let this thread
         # terminate.
         if channel.exit_status_ready():
             exit_status = channel.recv_exit_status()
-            return True
-        return False
+            return True, exit_status
+        return False, None
 
     # Wait for a message on the input_queue. Any message received signals this
     # thread to shut itself down.
-    while not communicate():
+    while True:
+        exited, exit_status = communicate()
+        if exited:
+            break
         # Kill some time so that this thread does not hog the CPU.
         time.sleep(1.0)
 
     # Shutdown the channel, and close the SSH connection
     channel.close()
     ssh.close()
+    return exit_status
