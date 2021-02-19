@@ -11,7 +11,6 @@ setup(name='malocher',
       install_requires=[
           "paramiko",
           "cloudpickle",
-          "tornado"
       ],
       packages=['malocher'],
       zip_safe=False
