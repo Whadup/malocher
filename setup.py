@@ -10,7 +10,7 @@ setup(name='malocher',
       license='MIT',
       install_requires=[
           "paramiko",
-          "cloudpickle",
+          "dill",
       ],
       packages=['malocher'],
       zip_safe=False
