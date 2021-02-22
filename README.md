@@ -5,7 +5,7 @@
 Malocher is a lightweight python library for running jobs on a cluster where nodes are accessed via SSH and share a common network storage like traditional NFS or mountable cloud storage. We
 
 - use SSH and `paramiko` for communication between workers,
-- rely on`cloudpickle` for serializing code and data and
+- rely on`dill` for serializing code and data and
 - assume that all python libraries and interpreters are available on all nodes, like when they're also in the NFS.
 
 This way we do not need to use large cluster computing libraries, e.g. from the Apache universe.
