@@ -63,4 +63,6 @@ if __name__ == "__main__":
         print(CONFIGS[JOB], RESULT)
 ```
 
-
+## Software-Cosmos
+Malocher is used in [Experiment Runner](https://github.com/sbuschjaeger/experiment_runner) to execute experiments on a number of machines.
+For experiment tracking, we advice the use of [meticulous](https://github.com/AshwinParanjape/meticulous-ml/).
