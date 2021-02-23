@@ -72,6 +72,7 @@ if __name__ == "__main__":
 
 Malocher starts each job in a new python interpreter. When libraries have changed during the experiment, these changes will be reflected in the outputs of the jobs. Try to avoid updating libraries and avoid installing libraries you're currently working on with `pip install -e`.
 
+Arguments and globals will be stored on disk per job. Avoid loading large amounts of data in the main process to pass to the workers, as this will result in large files and long io waits.
 
 ## Software-Cosmos
 Malocher is used in [Experiment Runner](https://github.com/sbuschjaeger/experiment_runner) to execute experiments on a number of machines.
