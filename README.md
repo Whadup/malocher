@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
 ## Pitfalls
 
-Malocher starts each job in a new python interpreter. When libraries have changed during the experiment, these changes will be reflected in the outputs of the jobs.
+Malocher starts each job in a new python interpreter. When libraries have changed during the experiment, these changes will be reflected in the outputs of the jobs. Try to avoid updating libraries and avoid installing libraries you're currently working on with `pip install -e`.
 
 
 ## Software-Cosmos
