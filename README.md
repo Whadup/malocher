@@ -57,7 +57,12 @@ if __name__ == "__main__":
         MODEL = RandomForestClassifier(max_depth=D)
         # Store our Configuration under the Job's ID
         CONFIGS[malocher.submit(fake_experiment, MODEL, data_path="/home/share/datensaetze/pamono")] = D
-    RESULTS = malocher.process_all(machines=["ls8ws020", "ls8ws021", "ls8ws022", "ls8ws023", "ls8ws024", "ls8ws025"])
+    RESULTS = malocher.process_all(
+        ssh_machines=["ls8ws020", "ls8ws021", "ls8ws022", "ls8ws023", "ls8ws024", "ls8ws025"],
+        ssh_port=22,
+        ssh_username="dummy",
+        ssh_private_key="malocher_id_rsa"
+    )
     # Retrieve the config by the result's ID
     for JOB, RESULT in RESULTS:
         print(CONFIGS[JOB], RESULT)
