@@ -8,6 +8,7 @@ Repo:   https://github.com/Whadup/malocher
 import sys
 import os
 import pickle
+import zipfile
 from queue import Queue, Empty
 from threading import Thread
 from functools import partial
@@ -16,6 +17,17 @@ import dill as cloudpickle
 from .ssh import async_ssh
 
 cloudpickle.settings['recurse'] = True
+
+def _zip_path(root_path, output_file):
+    repo = zipfile.ZipFile(output_file, "w")
+    for dirname, _, files in os.walk(root_path):
+        repo.write(os.path.normpath(os.path.relpath(dirname, root_path)))
+        for filename in files:
+            if filename.endswith(".py"):
+                repo.write(
+                    os.path.join(dirname, filename),
+                    os.path.normpath(os.path.relpath(os.path.join(dirname, filename), root_path)))
+    repo.close()
 
 def submit(
     fun,
@@ -40,8 +52,11 @@ def submit(
     # Add one to the largest experiment number
     job = os.path.abspath(os.path.join(malocher_dir, str(max(existing_int_exp + [0,]) + 1)))
     os.mkdir(job)
+    _zip_path(sys.path[0], os.path.join(job, "path.zip"))
+    path = list(sys.path)
+    path[0] = os.path.join(job, "path.zip")
     open(os.path.join(job, "globals.bin"), "wb").write(cloudpickle.dumps(globals()))
-    open(os.path.join(job, "path.bin"), "wb").write(cloudpickle.dumps((sys.path, os.getcwd())))
+    open(os.path.join(job, "path.bin"), "wb").write(cloudpickle.dumps((path, os.getcwd())))
     # open(os.path.join(job, "locals.bin"), "wb").write(cloudpickle.dumps(locals()))
     open(os.path.join(job, "args.bin"), "wb").write(cloudpickle.dumps(args))
     open(os.path.join(job, "kwargs.bin"), "wb").write(cloudpickle.dumps(kwargs))
