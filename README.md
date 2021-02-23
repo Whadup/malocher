@@ -68,6 +68,11 @@ if __name__ == "__main__":
         print(CONFIGS[JOB], RESULT)
 ```
 
+## Pitfalls
+
+Malocher starts each job in a new python interpreter. When libraries have changed during the experiment, these changes will be reflected in the outputs of the jobs.
+
+
 ## Software-Cosmos
 Malocher is used in [Experiment Runner](https://github.com/sbuschjaeger/experiment_runner) to execute experiments on a number of machines.
 For experiment tracking, we advice the use of [meticulous](https://github.com/AshwinParanjape/meticulous-ml/).
