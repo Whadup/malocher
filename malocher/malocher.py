@@ -19,17 +19,15 @@ from .ssh import async_ssh
 cloudpickle.settings['recurse'] = True
 
 def _zip_path(root_path, output_file):
-    zf = zipfile.ZipFile(output_file, "w")
-    print(root_path)
-    for dirname, subdirs, files in os.walk(root_path):
-        zf.write(os.path.normpath(os.path.relpath(dirname, root_path)))
+    repo = zipfile.ZipFile(output_file, "w")
+    for dirname, _, files in os.walk(root_path):
+        repo.write(os.path.normpath(os.path.relpath(dirname, root_path)))
         for filename in files:
             if filename.endswith(".py"):
-                print(os.path.normpath(os.path.relpath(os.path.join(dirname, filename), root_path)))
-                zf.write(
+                repo.write(
                     os.path.join(dirname, filename),
                     os.path.normpath(os.path.relpath(os.path.join(dirname, filename), root_path)))
-    zf.close()
+    repo.close()
 
 def submit(
     fun,
@@ -155,7 +153,6 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
     yield from iter(list(results.queue))
 
 def work(job):
-    print(pickle.load(open(os.path.join(job, "globals.bin"), "rb")).items())
     globals().update(pickle.load(open(os.path.join(job, "globals.bin"), "rb")))
     sys.path, work_dir = pickle.load(open(os.path.join(job, "path.bin"), "rb"))
     os.chdir(work_dir)
