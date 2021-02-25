@@ -14,6 +14,7 @@ from threading import Thread
 from functools import partial
 from glob import glob
 import dill as cloudpickle
+# import cloudpickle
 from .ssh import async_ssh
 
 cloudpickle.settings['recurse'] = True
@@ -108,7 +109,6 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
     def _ssh_call(args, machine=None, job=None):
         #put back machine after the ssh call and recover results
         result = async_ssh(args)
-        available_machines.put(machine)
         if result == 0:
             with open(os.path.join(job, "return.bin"), "rb") as f:
                 result = pickle.load(f)
@@ -117,6 +117,7 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
             with open(os.path.join(job, "DONE"), "w") as f:
                 f.write("ERROR")
                 results.put((job, None))
+        available_machines.put(machine)
 
     for m in zip(ssh_machines, ssh_username, ssh_port, ssh_private_key):
         available_machines.put(m)
@@ -133,7 +134,7 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
         ssh_address, ssh_username, ssh_port, ssh_private_key = machine
         cmd_dict = {'cmd': f"{sys.executable} -m malocher {job}",
                     'address': ssh_address,
-                    'ssh_username': ssh_username, 
+                    'ssh_username': ssh_username,
                     'ssh_port': ssh_port,
                     'ssh_private_key': ssh_private_key}
         thread = Thread(target=partial(_ssh_call, machine=machine, job=job), args=[cmd_dict])
@@ -153,13 +154,12 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
     yield from iter(list(results.queue))
 
 def work(job):
-    globals().update(pickle.load(open(os.path.join(job, "globals.bin"), "rb")))
+    # globals().update(**pickle.load(open(os.path.join(job, "globals.bin"), "rb"))) #dill takes care of this
     sys.path, work_dir = pickle.load(open(os.path.join(job, "path.bin"), "rb"))
     os.chdir(work_dir)
-    # locals().update(pickle.load(open(os.path.join(job, "locals.bin"), "rb")))
     args = pickle.load(open(os.path.join(job, "args.bin"), "rb"))
     kwargs = pickle.load(open(os.path.join(job, "kwargs.bin"), "rb"))
-    fun = pickle.load(open(os.path.join(job, "fun.bin"),"rb"))
+    fun = cloudpickle.load(open(os.path.join(job, "fun.bin"),"rb"))
     ret = fun(*args, **kwargs)
     open(os.path.join(job, "return.bin"), "wb").write(cloudpickle.dumps(ret))
     with open(os.path.join(job, "DONE"), "w") as f:
