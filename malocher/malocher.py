@@ -66,7 +66,7 @@ def submit(
 
 
 
-def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", ssh_port=22, ssh_private_key="/home/pfahler/.ssh/id_rsa"):
+def process_all(jobs=None, malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", ssh_port=22, ssh_private_key="/home/pfahler/.ssh/id_rsa"):
     """
     Runs all jobs in the `malocher_dir` and yields their return values.
 
@@ -121,9 +121,14 @@ def process_all(malocher_dir=".jobs", ssh_machines=[], ssh_username="pfahler", s
 
     for m in zip(ssh_machines, ssh_username, ssh_port, ssh_private_key):
         available_machines.put(m)
-    for job in os.listdir(malocher_dir):
-        if not os.path.exists(os.path.join(malocher_dir, job, "DONE")):
-            remaining_jobs.put(os.path.abspath(os.path.join(malocher_dir, job)))
+    if jobs is None:
+        for job in os.listdir(malocher_dir):
+            if not os.path.exists(os.path.join(malocher_dir, job, "DONE")):
+                remaining_jobs.put(os.path.abspath(os.path.join(malocher_dir, job)))
+    else:
+        for job in jobs:
+            remaining_jobs.put(job)
+
     
     threads = []
 

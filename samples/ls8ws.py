@@ -3,10 +3,11 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 import malocher
-
+from jochen import test as jochen
 
 def fake_experiment(model, data_path=None):
     print(model)
+    jochen()
     train = pd.read_csv(os.path.join(data_path, "train.csv"))
     y_train = train["class"]
     X_train = train.drop(columns="class")
@@ -21,7 +22,7 @@ def fake_experiment(model, data_path=None):
 if __name__ == "__main__":
     print("running")
     CONFIGS = {}
-    for D in range(1,10):
+    for D in range(1, 10):
         MODEL = RandomForestClassifier(max_depth=D)
         # Store our Configuration under the Job's ID
         CONFIGS[malocher.submit(fake_experiment, MODEL, data_path="/home/share/datensaetze/pamono")] = D
