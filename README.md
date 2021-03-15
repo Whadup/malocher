@@ -60,6 +60,7 @@ if __name__ == "__main__":
         CONFIGS[JOB] = D
 
     RESULTS = malocher.process_all(
+        jobs=CONFIGS.values(),
         ssh_machines=["ls8ws020", "ls8ws021", "ls8ws022", "ls8ws023", "ls8ws024", "ls8ws025"],
         ssh_port=22,
         ssh_username="dummy",
